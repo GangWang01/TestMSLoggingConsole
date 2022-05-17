@@ -49,7 +49,7 @@ namespace TestMSLogging
                     CreateDebugMessage(textWriter, logEntry, message!, scopeProvider);
                     break;
             }
-            textWriter.Flush();
+            //textWriter.Flush();
         }
 
         public void Dispose() => _optionsReloadToken?.Dispose();

@@ -18,6 +18,8 @@ namespace TestMSLogging
             //Console.WriteLine("Test logging with predefined SimpleConsole formatter.");
             //var logger = host.LogFactory.CreateLogger("SimpleConsole");
             //Log(logger, "SimpleConsole formatter", messages);
+            
+            host.Dispose();
         }
 
         private static void Log(ILogger logger, string formatterName, string[] messages)
@@ -33,7 +35,7 @@ namespace TestMSLogging
 
         private static string[] GenerateMessages()
         {
-            int length = 50;
+            int length = 1000;
             var messages = new string[length];
             for(int i = 0; i < length; i++)
             {
