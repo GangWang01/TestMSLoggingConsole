@@ -1,0 +1,58 @@
+import { useState, useEffect } from 'react';
+import { getDocument, GlobalWorkerOptions, type PDFDocumentProxy } from 'pdfjs-dist';
+
+
+// Set worker
+GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
+
+interface UsePdfResult {
+  pdfs: PDFDocumentProxy[];
+  loading: boolean;
+  error: Error | null;
+}
+
+export function usePdf(urls: string[]): UsePdfResult {
+  const [pdfs, setPdfs] = useState<PDFDocumentProxy[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    if (!urls || urls.length === 0) {
+      setPdfs([]);
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    Promise.all(
+      urls.map(async (url) => {
+        const loadingTask = getDocument(url); // ✅ use getDocument from pdfjsLib
+        const pdfDoc = await loadingTask.promise;
+        return pdfDoc;
+      })
+    )
+      .then((loadedPdfs) => {
+        if (!cancelled) {
+          setPdfs(loadedPdfs);
+          setLoading(false);
+          console.log('Loaded PDFs:', loadedPdfs.length);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setError(err);
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+      // pdfs.forEach((pdfDoc) => pdfDoc.destroy());
+    };
+  }, [urls]);
+
+  return { pdfs, loading, error };
+}
